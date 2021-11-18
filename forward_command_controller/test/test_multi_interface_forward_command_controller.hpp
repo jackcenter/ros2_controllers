@@ -27,9 +27,11 @@
 
 using hardware_interface::CommandInterface;
 using hardware_interface::HW_IF_POSITION;
+using hardware_interface::HW_IF_VELOCITY;
+using hardware_interface::HW_IF_EFFORT;
 
 // subclassing and friending so we can access member variables
-class FriendMultiInterfaceForwardCommandController : public forward_command_controller::ForwardCommandController
+class FriendMultiInterfaceForwardCommandController : public forward_command_controller::MultiInterfaceForwardCommandController
 {
   FRIEND_TEST(MultiInterfaceForwardCommandControllerTest, JointsParameterNotSet);
   FRIEND_TEST(MultiInterfaceForwardCommandControllerTest, InterfaceParameterNotSet);
@@ -69,11 +71,9 @@ protected:
   double velocity_command_ = 2.1;
   double effort_command_ = 3.1;
 
-  std::vector<CommandInterface> command_ifs_{
-    {joint_name_, HW_IF_POSITION, &position_command_;}
-    {joint_name_, HW_IF_VELOCITY, &velocity_command_;}
-    {joint_name_, HW_IF_EFFORT, &effort_command_;}
-  };
+  CommandInterface joint_1_pos_cmd_{joint_name_, HW_IF_POSITION, &position_command_};
+  CommandInterface joint_1_vel_cmd_{joint_name_, HW_IF_VELOCITY, &velocity_command_};
+  CommandInterface joint_1_eff_cmd_{joint_name_, HW_IF_EFFORT, &effort_command_};
 };
 
 #endif  // TEST_FORWARD_COMMAND_CONTROLLER_HPP_

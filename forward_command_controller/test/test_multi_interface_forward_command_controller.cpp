@@ -22,6 +22,7 @@
 
 #include "test_multi_interface_forward_command_controller.hpp"
 
+#include "forward_command_controller/forward_command_controller.hpp"
 #include "forward_command_controller/multi_interface_forward_command_controller.hpp"
 #include "hardware_interface/loaned_command_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
@@ -49,7 +50,7 @@ rclcpp::WaitResultKind wait_for(rclcpp::SubscriptionBase::SharedPtr subscription
 
 void MultiInterfaceForwardCommandControllerTest::SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-void MultiForwardCommandControllerTest::TearDownTestCase() { rclcpp::shutdown(); }
+void MultiInterfaceForwardCommandControllerTest::TearDownTestCase() { rclcpp::shutdown(); }
 
 void MultiInterfaceForwardCommandControllerTest::SetUp()
 {
@@ -63,61 +64,63 @@ void MultiInterfaceForwardCommandControllerTest::SetUpController()
 {
   const auto result = controller_->init("forward_command_controller");
   ASSERT_EQ(result, controller_interface::return_type::OK);
-  controller_->assign_interfaces(std::move(command_ifs_), {});
+
+  std::vector<LoanedCommandInterface> command_ifs;
+  command_ifs.emplace_back(joint_1_pos_cmd_);
+  command_ifs.emplace_back(joint_1_vel_cmd_);
+  command_ifs.emplace_back(joint_1_eff_cmd_);
+  controller_->assign_interfaces(std::move(command_ifs), {});
 }
 
-TEST_F(ForwardCommandControllerTest, JointsParameterNotSet)
+TEST_F(MultiInterfaceForwardCommandControllerTest, JointsParameterNotSet)
 {
   SetUpController();
-  controller_->get_node()->set_parameter({"interface_name", "dummy"});
+  controller_->get_node()->set_parameter({"interface_names", std::vector<std::string>()});
 
-  // configure failed, 'joints' parameter not set
+  // configure failed, 'joint' parameter not set
   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
 }
 
-// TEST_F(ForwardCommandControllerTest, InterfaceParameterNotSet)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, InterfaceParameterNotSet)
+{
+  SetUpController();
+  controller_->get_node()->set_parameter({"joint", ""});
 
-//   // configure failed, 'interface_name' parameter not set
-//   controller_->get_node()->set_parameter({"joints", std::vector<std::string>()});
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-//   controller_->get_node()->set_parameter({"interface_name", ""});
-// }
+  // configure failed, 'interface_names' parameter not set
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+}
 
-// TEST_F(ForwardCommandControllerTest, JointsParameterIsEmpty)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, JointsParameterIsEmpty)
+{
+  SetUpController();
 
-//   controller_->get_node()->set_parameter({"joints", std::vector<std::string>()});
-//   controller_->get_node()->set_parameter({"interface_name", ""});
+  controller_->get_node()->set_parameter({"joint", ""});
+  controller_->get_node()->set_parameter({"interface_names", std::vector<std::string>()});
 
-//   // configure failed, 'joints' is empty
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-// }
+  // configure failed, 'joint' is empty
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+}
 
-// TEST_F(ForwardCommandControllerTest, InterfaceParameterEmpty)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, InterfaceParameterEmpty)
+{
+  SetUpController();
+  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter({"interface_names", std::vector<std::string>()});
 
-//   // configure failed, 'interface_name' parameter not set
-//   controller_->get_node()->set_parameter({"joints", std::vector<std::string>{"joint1", "joint2"}});
-//   controller_->get_node()->set_parameter({"interface_name", ""});
+  // configure failed, 'interface_name' is empty
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+}
 
-//   // configure failed, 'interface_name' is empty
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-// }
+TEST_F(MultiInterfaceForwardCommandControllerTest, ConfigureParamsSuccess)
+{
+  SetUpController();
 
-// TEST_F(ForwardCommandControllerTest, ConfigureParamsSuccess)
-// {
-//   SetUpController();
+  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter({"interface_names", std::vector<std::string>{"position", "velocity"}});
 
-//   controller_->get_node()->set_parameter({"joints", std::vector<std::string>{"joint1", "joint2"}});
-//   controller_->get_node()->set_parameter({"interface_name", "position"});
-
-//   // configure successful
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-// }
+  // configure successful
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+}
 
 // TEST_F(ForwardCommandControllerTest, ActivateWithWrongJointsNamesFails)
 // {
@@ -375,4 +378,4 @@ TEST_F(ForwardCommandControllerTest, JointsParameterNotSet)
 //   ASSERT_EQ(joint_1_pos_cmd_.get_value(), 5.5);
 //   ASSERT_EQ(joint_2_pos_cmd_.get_value(), 6.6);
 //   ASSERT_EQ(joint_3_pos_cmd_.get_value(), 7.7);
-}
+// }
