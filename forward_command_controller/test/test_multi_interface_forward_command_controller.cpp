@@ -116,54 +116,56 @@ TEST_F(MultiInterfaceForwardCommandControllerTest, ConfigureParamsSuccess)
   SetUpController();
 
   controller_->get_node()->set_parameter({"joint", "joint1"});
-  controller_->get_node()->set_parameter({"interface_names", std::vector<std::string>{"position", "velocity"}});
+  controller_->get_node()->set_parameter(
+    {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
 
   // configure successful
   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
 }
 
-// TEST_F(ForwardCommandControllerTest, ActivateWithWrongJointsNamesFails)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateWithWrongJointsNamesFails)
+{
+  SetUpController();
 
-//   controller_->get_node()->set_parameter({"joints", std::vector<std::string>{"joint1", "joint4"}});
-//   controller_->get_node()->set_parameter({"interface_name", "position"});
+  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter(
+    {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
 
-//   // activate failed, 'joint4' is not a valid joint name for the hardware
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-//   ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+  ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
 
-//   auto result = controller_->get_node()->set_parameter(
-//     {"joints", std::vector<std::string>{"joint1", "joint2"}});
-//   ASSERT_TRUE(result.successful);
+  auto result = controller_->get_node()->set_parameter({"joints", "joints2"});
+  ASSERT_TRUE(result.successful);
 
-//   // activate failed, 'acceleration' is not a registered interface for `joint1`
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-//   ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-// }
+  // activate failed, 'joint2' is not a valid joint name for the hardware
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+  ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+}
 
-// TEST_F(ForwardCommandControllerTest, ActivateWithWrongInterfaceNameFails)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateWithWrongInterfaceNameFails)
+{
+  SetUpController();
 
-//   controller_->get_node()->set_parameter({"joints", joint_names_});
-//   controller_->get_node()->set_parameter({"interface_name", "acceleration"});
+  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter(
+    {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
 
-//   // activate failed, 'joint4' not in interfaces
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-//   ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-// }
+  // activate failed, 'jerk' is not a registered interface for `joint1`
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+  ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
+}
 
-// TEST_F(ForwardCommandControllerTest, ActivateSuccess)
-// {
-//   SetUpController();
+TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateSuccess)
+{
+  SetUpController();
 
-//   controller_->get_node()->set_parameter({"joints", joint_names_});
-//   controller_->get_node()->set_parameter({"interface_name", "position"});
+  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter(
+    {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
 
-//   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-//   ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-// }
+  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+  ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
+}
 
 // TEST_F(ForwardCommandControllerTest, CommandSuccessTest)
 // {
