@@ -127,15 +127,9 @@ TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateWithWrongJointsNamesF
 {
   SetUpController();
 
-  controller_->get_node()->set_parameter({"joint", "joint1"});
+  controller_->get_node()->set_parameter({"joint", "joint2"});
   controller_->get_node()->set_parameter(
     {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
-
-  ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
-  ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
-
-  auto result = controller_->get_node()->set_parameter({"joints", "joints2"});
-  ASSERT_TRUE(result.successful);
 
   // activate failed, 'joint2' is not a valid joint name for the hardware
   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
@@ -148,7 +142,7 @@ TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateWithWrongInterfaceNam
 
   controller_->get_node()->set_parameter({"joint", "joint1"});
   controller_->get_node()->set_parameter(
-    {"interface_names", std::vector<std::string>{"position", "velocity", "effort"}});
+    {"interface_names", std::vector<std::string>{"position", "velocity", "acceleration"}});
 
   // activate failed, 'jerk' is not a registered interface for `joint1`
   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
