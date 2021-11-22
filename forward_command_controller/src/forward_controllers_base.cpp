@@ -94,11 +94,11 @@ CallbackReturn ForwardControllersBase::on_activate(
   if (
     !controller_interface::get_ordered_interfaces(
       command_interfaces_, command_interface_types_, std::string(""), ordered_interfaces) ||
-    command_interfaces_.size() != ordered_interfaces.size())
+    command_interface_types_.size() != ordered_interfaces.size())
   {
     RCLCPP_ERROR(
-      node_->get_logger(), "Expected %zu position command interfaces, got %zu", joint_names_.size(),
-      ordered_interfaces.size());
+      node_->get_logger(), "Expected %zu command interfaces, got %zu",
+      command_interface_types_.size(), ordered_interfaces.size());
     return rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR;
   }
 
