@@ -144,7 +144,7 @@ TEST_F(MultiInterfaceForwardCommandControllerTest, ActivateWithWrongInterfaceNam
   controller_->get_node()->set_parameter(
     {"interface_names", std::vector<std::string>{"position", "velocity", "acceleration"}});
 
-  // activate failed, 'jerk' is not a registered interface for `joint1`
+  // activate failed, 'acceleration' is not a registered interface for `joint1`
   ASSERT_EQ(controller_->on_configure(rclcpp_lifecycle::State()), CallbackReturn::SUCCESS);
   ASSERT_EQ(controller_->on_activate(rclcpp_lifecycle::State()), CallbackReturn::ERROR);
 }
