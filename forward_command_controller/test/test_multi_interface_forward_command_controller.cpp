@@ -22,7 +22,6 @@
 
 #include "test_multi_interface_forward_command_controller.hpp"
 
-#include "forward_command_controller/forward_command_controller.hpp"
 #include "forward_command_controller/multi_interface_forward_command_controller.hpp"
 #include "hardware_interface/loaned_command_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
@@ -34,7 +33,8 @@
 #include "rclcpp/wait_set.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 
-using CallbackReturn = forward_command_controller::ForwardCommandController::CallbackReturn;
+using CallbackReturn =
+  forward_command_controller::MultiInterfaceForwardCommandController::CallbackReturn;
 using hardware_interface::LoanedCommandInterface;
 
 namespace
@@ -62,7 +62,7 @@ void MultiInterfaceForwardCommandControllerTest::TearDown() { controller_.reset(
 
 void MultiInterfaceForwardCommandControllerTest::SetUpController()
 {
-  const auto result = controller_->init("forward_command_controller");
+  const auto result = controller_->init("multi_interface_forward_command_controller");
   ASSERT_EQ(result, controller_interface::return_type::OK);
 
   std::vector<LoanedCommandInterface> command_ifs;
