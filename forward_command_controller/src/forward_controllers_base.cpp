@@ -105,6 +105,7 @@ CallbackReturn ForwardControllersBase::on_activate(
   // reset command buffer if a command came through callback when controller was inactive
   rt_command_ptr_ = realtime_tools::RealtimeBuffer<std::shared_ptr<CmdType>>(nullptr);
 
+  RCLCPP_INFO(get_node()->get_logger(), "activate successful");
   return CallbackReturn::SUCCESS;
 }
 
